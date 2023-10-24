@@ -31,10 +31,10 @@ type Fetcher struct {
 	filterKeywords []string
 }
 
-func New(articleStorage ArticleStorageInterface, provider SourceProviderInterface, fetchInterval time.Duration, filterKeywords []string) *Fetcher {
+func New(articleStorage ArticleStorageInterface, sourceProvider SourceProviderInterface, fetchInterval time.Duration, filterKeywords []string) *Fetcher {
 	return &Fetcher{
 		articles:       articleStorage,
-		source:         provider,
+		source:         sourceProvider,
 		fetchInterval:  fetchInterval,
 		filterKeywords: filterKeywords,
 	}
