@@ -8,7 +8,7 @@ CREATE TABLE articles (
     summary TEXT NOT NULL,
     published_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    posted_at TIMESTAMP NOT NULL,
+    posted_at TIMESTAMP,
     CONSTRAINT fk_articles_source_id
       FOREIGN KEY (source_id)
         REFERENCES sources (id)

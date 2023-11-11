@@ -37,14 +37,34 @@ func New(articles ArticleProviderInterface,
 	bot *tgbotapi.BotAPI,
 	sendInterval time.Duration,
 	lookupTimeWindow time.Duration,
-	channelID int64) Notifier {
-	return Notifier{
+	channelID int64) *Notifier {
+	return &Notifier{
 		articles:         articles,
 		summarizer:       summarizer,
 		bot:              bot,
 		sendInterval:     sendInterval,
 		lookupTimeWindow: lookupTimeWindow,
 		channelID:        channelID,
+	}
+}
+
+func (n *Notifier) Start(ctx context.Context) error {
+	ticker := time.NewTicker(n.sendInterval)
+	defer ticker.Stop()
+
+	if err := n.SelectAndSendArticle(ctx); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := n.SelectAndSendArticle(ctx); err != nil {
+				return err
+			}
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 }
 

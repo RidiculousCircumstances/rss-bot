@@ -122,7 +122,15 @@ func (f *Fetcher) processItems(ctx context.Context, source SourceInterface, item
 }
 
 func (f *Fetcher) shouldSkipItem(item model.Item) bool {
-	intersect := lo.Intersect(f.filterKeywords, item.Categories)
+
+	filterKeywords := f.filterKeywords
+
+	if len(filterKeywords) == 0 {
+		return false
+	}
+
+	intersect := lo.Intersect(filterKeywords, item.Categories)
 	shouldSkip := len(intersect)
 	return shouldSkip == 0
+
 }
