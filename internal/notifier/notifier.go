@@ -23,6 +23,8 @@ type SummarizerInterface interface {
 	Summarize(ctx context.Context, text string) (string, error)
 }
 
+var redundantNewLines = regexp.MustCompile(`\n{3,}`)
+
 type Notifier struct {
 	articles         ArticleProviderInterface
 	summarizer       SummarizerInterface
@@ -113,15 +115,17 @@ func (n *Notifier) extractSummary(ctx context.Context, article model.Article) (s
 		return "", err
 	}
 
-	cleanedText := cleanText(doc.TextContent)
-
-	summary, err := n.summarizer.Summarize(ctx, cleanedText)
+	summary, err := n.summarizer.Summarize(ctx, cleanupText(doc.TextContent))
 	if err != nil {
 		return "", err
 	}
 
-	return summary, nil
+	return "\n\n" + summary, nil
 
+}
+
+func cleanupText(text string) string {
+	return redundantNewLines.ReplaceAllString(text, "\n")
 }
 
 func (n *Notifier) sendArticle(article model.Article, summary string) error {
@@ -143,10 +147,4 @@ func (n *Notifier) sendArticle(article model.Article, summary string) error {
 
 	return nil
 
-}
-
-func cleanText(text string) string {
-	var redundantEmptyLines = regexp.MustCompile(`\n{3,}`)
-
-	return redundantEmptyLines.ReplaceAllString(text, "\n")
 }

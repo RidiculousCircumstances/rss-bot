@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"os/signal"
+	"rss-bot/internal/bot"
+	"rss-bot/internal/botkit"
 	"rss-bot/internal/config"
 	"rss-bot/internal/fetcher"
 	"rss-bot/internal/notifier"
@@ -53,6 +56,9 @@ func main() {
 
 	defer cancel()
 
+	newsBot := botkit.NewBot(botApi)
+	newsBot.RegisterCmdView("start", bot.ViewCmdStart())
+
 	go func(ctx context.Context) {
 		if err := fetcherInstance.Start(ctx); err != nil {
 
@@ -75,4 +81,12 @@ func main() {
 			log.Println("notifier stopped")
 		}
 	}(ctx)
+
+	if err := newsBot.Run(ctx); err != nil {
+		if !errors.Is(err, context.Canceled) {
+			log.Printf("[ERROR]: failed to start bot: %v", err)
+		}
+
+		fmt.Println("news bot stopped")
+	}
 }

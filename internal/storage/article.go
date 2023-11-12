@@ -46,14 +46,24 @@ func (a *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 
 	var articles []dbArticle
 
+	//if err := a.db.SelectContext(ctx, &articles, `
+	//	SELECT * from articles
+	//	         WHERE posted_at IS NULL
+	//	           AND published_at > $1::timestamp
+	//	         ORDER BY published_at DESC
+	//	         limit $2
+	//`,
+	//	since.UTC().Format(time.RFC3339),
+	//	limit); err != nil {
+	//	return nil, err
+	//}
+
 	if err := a.db.SelectContext(ctx, &articles, `
-		SELECT * from articles 
-		         WHERE posted_at IS NULL 
-		           AND published_at > $1::timestamp 
+		SELECT * from articles
+		         WHERE posted_at IS NULL
 		         ORDER BY published_at DESC
-		         limit $2
+		         limit $1
 	`,
-		since.UTC().Format(time.RFC3339),
 		limit); err != nil {
 		return nil, err
 	}
@@ -92,7 +102,7 @@ func (a *ArticlePostgresStorage) MarkAsPosted(ctx context.Context, id int64) err
 type dbArticle struct {
 	ID int64 `db:"id"`
 	//SourcePriority int64          `db:"priority"`
-	SourceId    int64          `db:"id"`
+	SourceId    int64          `db:"source_id"`
 	Title       string         `db:"title"`
 	Link        string         `db:"link"`
 	Summary     sql.NullString `db:"summary"`
