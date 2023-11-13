@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/signal"
 	"rss-bot/internal/bot"
+	"rss-bot/internal/bot/middleware"
 	"rss-bot/internal/botkit"
 	"rss-bot/internal/config"
 	"rss-bot/internal/fetcher"
@@ -58,6 +59,8 @@ func main() {
 
 	newsBot := botkit.NewBot(botApi)
 	newsBot.RegisterCmdView("start", bot.ViewCmdStart())
+	newsBot.RegisterCmdView("add_source", middleware.AdminOnly(bot.ViewCmdAddSource(sourceStorage)))
+	newsBot.RegisterCmdView("get_sources", middleware.AdminOnly(bot.ViewCmdListSources(sourceStorage)))
 
 	go func(ctx context.Context) {
 		if err := fetcherInstance.Start(ctx); err != nil {

@@ -8,7 +8,7 @@ import (
 
 func ViewCmdStart() botkit.ViewFunc {
 	return func(ctx context.Context, bot *tgbotapi.BotAPI, update tgbotapi.Update) error {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Fuck you!")
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Ready to work")
 
 		if _, err := bot.Send(msg); err != nil {
 			return err

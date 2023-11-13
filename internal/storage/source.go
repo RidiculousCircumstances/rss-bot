@@ -68,25 +68,25 @@ func (s *SourcePostgresStorage) SourceById(ctx context.Context, id int64) (*mode
 }
 
 func (s *SourcePostgresStorage) Add(ctx context.Context, source model.Source) (int64, error) {
-	conn, err := s.db.Conn(ctx)
+	conn, err := s.db.Connx(ctx)
 	if err != nil {
 		return 0, err
 	}
 	defer conn.Close()
 
-	row := conn.QueryRowContext(
+	var id int64
+
+	row := conn.QueryRowxContext(
 		ctx,
-		`INSERT INTO sources (name, feed_url, created_at) VALUES($1, $2, $3)`,
-		source.Name,
-		source.FeedUrl,
-		source.CreatedAt,
+		`INSERT INTO sources (name, feed_url, priority)
+					VALUES ($1, $2, $3) RETURNING id;`,
+		source.Name, source.FeedUrl, source.Priority,
 	)
 
 	if err := row.Err(); err != nil {
 		return 0, err
 	}
 
-	var id int64
 	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
